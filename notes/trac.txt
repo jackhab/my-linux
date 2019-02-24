@@ -1,25 +1,20 @@
-    1  sudo apt-get install git
-    2  git clone https://github.com/jackhab/my-linux
-    3  mv my-linux/ my
-    4  apt-get install vim
-    5  sudo apt-get install vim
-    6  vi .bashrc 
-    7  sudo apt-get install apache2 -y
-    8  sudo systemctl start apache2
-    9  sudo systemctl enable apache2
-   10  sudo apt-get install trac libapache2-mod-wsgi -y
-   11  sudo apt-get update
-   12  sudo apt-get install trac libapache2-mod-wsgi -y
-   13  sudo a2enmod auth_digest
-   14  sudo mkdir /var/lib/trac
-   15  sudo mkdir -p /var/www/html/trac
-   16  sudo chown www-data:www-data /var/www/html/trac
-   17  sudo trac-admin /var/lib/trac/test initenv test sqlite:db/trac.db
-   18  sudo trac-admin /var/lib/trac/test deploy /var/www/html/trac/test
-   19  sudo chown -R www-data:www-data /var/lib/trac/test
-   20  sudo chown -R www-data:www-data /var/www/html/trac/test
-   21  sudo htdigest -c /var/lib/trac/test/.htdigest "test" admin
-   22  echo '
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get install git trac libapache2-mod-wsgi apache2 -y
+sudo systemctl start apache2
+sudo systemctl enable apache2
+sudo a2enmod auth_digest
+
+sudo mkdir /var/lib/trac
+sudo mkdir -p /var/www/html/trac
+sudo chown www-data:www-data /var/www/html/trac
+sudo trac-admin /var/lib/trac/test initenv test sqlite:db/trac.db
+sudo trac-admin /var/lib/trac/test deploy /var/www/html/trac/test
+sudo chown -R www-data:www-data /var/lib/trac/test
+sudo chown -R www-data:www-data /var/www/html/trac/test
+sudo htdigest -c /var/lib/trac/test/.htdigest "test" admin
+
+echo '
 WSGIScriptAlias /trac/test /var/www/html/trac/test/cgi-bin/trac.wsgi
 <Location /trac/test>
   AuthType Digest
@@ -27,20 +22,10 @@ WSGIScriptAlias /trac/test /var/www/html/trac/test/cgi-bin/trac.wsgi
   AuthUserFile /var/lib/trac/test/.htdigest
   Require valid-user
 </Location>
-' >> /etc/apache2/sites-available/trac.conf
-   23  sudo echo '
-WSGIScriptAlias /trac/test /var/www/html/trac/test/cgi-bin/trac.wsgi
-<Location /trac/test>
-  AuthType Digest
-  AuthName "test"
-  AuthUserFile /var/lib/trac/test/.htdigest
-  Require valid-user
-</Location>
-' >> /etc/apache2/sites-available/trac.conf
-   24  sudo su
-   25  sudo a2ensite trac.conf
-   26  sudo systemctl restart apache2
-   27  history 
-   28  history > my/notes/trac.txt
+' > /etc/apache2/sites-available/trac.conf
+
+sudo a2ensite trac.conf
+sudo systemctl restart apache2
+
 wget https://download.edgewall.org/trac/Trac-1.2.3.tar.gz
 sudo ./setup.py install
