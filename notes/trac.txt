@@ -1,3 +1,5 @@
+export PROJ_NAME=bamw
+
 sudo apt-get update -y
 sudo apt-get upgrade -y
 sudo apt-get install git trac libapache2-mod-wsgi apache2 -y
@@ -5,27 +7,59 @@ sudo systemctl start apache2
 sudo systemctl enable apache2
 sudo a2enmod auth_digest
 
-sudo mkdir /var/lib/trac
+sudo mkdir ${HOME}/trac
 sudo mkdir -p /var/www/html/trac
 sudo chown www-data:www-data /var/www/html/trac
-sudo trac-admin /var/lib/trac/test initenv test sqlite:db/trac.db
-sudo trac-admin /var/lib/trac/test deploy /var/www/html/trac/test
-sudo chown -R www-data:www-data /var/lib/trac/test
-sudo chown -R www-data:www-data /var/www/html/trac/test
-sudo htdigest -c /var/lib/trac/test/.htdigest "test" admin
+sudo trac-admin ${HOME}/trac/${PROJ_NAME} initenv ${PROJ_NAME} sqlite:db/trac.db
+sudo trac-admin ${HOME}/trac/${PROJ_NAME} deploy /var/www/html/trac/${PROJ_NAME}
+sudo chown -R www-data:www-data ${HOME}/trac/${PROJ_NAME}
+sudo chown -R www-data:www-data /var/www/html/trac/${PROJ_NAME}
 
-echo '
-WSGIScriptAlias /trac/test /var/www/html/trac/test/cgi-bin/trac.wsgi
-<Location /trac/test>
+trac-admin ${HOME}/trac/${PROJ_NAME} permission add admin TRAC_ADMIN
+sudo htdigest -c ${HOME}/trac/${PROJ_NAME}/.htdigest "${PROJ_NAME}" admin
+
+sudo sh -c "echo '
+WSGIScriptAlias /trac/${PROJ_NAME} /var/www/html/trac/${PROJ_NAME}/cgi-bin/trac.wsgi
+<Location /trac/${PROJ_NAME}>
   AuthType Digest
-  AuthName "test"
-  AuthUserFile /var/lib/trac/test/.htdigest
-  Require valid-user
+  AuthName "${PROJ_NAME}"
+  AuthUserFile ${HOME}/trac/${PROJ_NAME}/.htdigest
+  Require valid-user  
 </Location>
-' > /etc/apache2/sites-available/trac.conf
+' > /etc/apache2/sites-available/trac.conf"
+
+#Require valid-user
+
 
 sudo a2ensite trac.conf
 sudo systemctl restart apache2
 
 wget https://download.edgewall.org/trac/Trac-1.2.3.tar.gz
+tar xf Trac-1.2.3.tar.gz
+cd Trac-1.2.3
 sudo ./setup.py install
+sudo systemctl restart apache2
+
+
+#add more users
+sudo trac-admin . permission add evgenyh TICKET_ADMIN WIKI_ADMIN
+sudo htdigest .htdigest ${PROJ_NAME} evgenyh
+
+
+
+
+STANDALONE TEST -WORKS
+trac-admin test-trac initenv test sqlite:db/trac.db
+trac-admin test-trac permission add admin TRAC_ADMIN
+htpasswd -bc test-trac/.htpasswd admin pass
+tracd --port 8000 --basic-auth="test-trac,test-trac/.htpasswd,trac" test-trac
+
+
+
+
+
+
+
+
+
+
