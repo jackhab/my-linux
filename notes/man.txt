@@ -1,2 +1,4 @@
 preferring programming sections
 export MANSECT="2:3posix:1:n:l:8:3:3pm:3perl:5:4:9:6:7"
+
+LESS="--jump-target=5"
