@@ -3,6 +3,7 @@
 #generate an array of sorted file names and full paths
 IFS=$'\n' Files=($(find $HOME/my/notes -type f -printf '%f\t%p\n' | sort | tr '\t' '\n'))
 
+
 #show file selector
 File=$(zenity   --title 'Notes' --text="" \
                 --list --hide-header --column '' --column ''    \
@@ -10,9 +11,13 @@ File=$(zenity   --title 'Notes' --text="" \
                 --width=700 --height=900 \
                 "${Files[@]}")
 
+#due to possible bug on Ubuntu 14 zenity prints second column twice separated with "|"
+#this removes second column from the file name
+File="${File/|*}"
+
 [[ -z $File ]] && exit 0
 
-#show selected file, if Cancel pressed is viewer open file in editor
+#show selected file in viewer, if Cancel pressed in editor
 zenity  --text-info --filename=$File --text="" \
         --cancel-label="Close" --ok-label="Edit" \
         --font=Monospace --width=700 --height=900 \

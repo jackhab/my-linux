@@ -1,0 +1,14 @@
+sudo su
+
+cd /etc/apt
+mv sources.list sources.list.bak
+wget ftp://dvdurep/sources.list.general
+mv sources.list.general sources.list
+
+COMMENT OUT UNRELATED REPOS!
+
+apt-get install -y terminator mc meld vim git wireshark tree sshfs htop gnome-disk-utility gparted tmux openssh-server samba g++ cifs-utils
+
+apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker
+
+UPDATE fstab smb.conf

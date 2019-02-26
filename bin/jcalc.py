@@ -3,17 +3,6 @@
 
 # TODO:
 
-
-#A = 10+a*1M
-#    10+10*1e6
-#    /usr/lib/python3.5/re.py:203: FutureWarning: split() requires a non-empty pattern match.
-#      return _compile(pattern, flags).split(string, maxsplit)
-
-
-
-
-# search the closest power for suffix attachment min(ppp, key=lambda x: abs(x-10))
-
 # , char  switches separator on/off
 # highligt on Windows platform
 # highlight float numbers properly (int part is broken because of dot)
@@ -21,6 +10,7 @@
 # accept 'h' suffix for hex numbers
 #
 # DONE:
+# search the closest power for suffix attachment min(ppp, key=lambda x: abs(x-10))
 # KMGmunpf suffixes
 # allow binary number input 0b11010
 # help for operators and math functions
@@ -39,6 +29,28 @@ from math import *
 if sys.platform == 'win32':
     import ctypes
     ctypes.windll.kernel32.SetConsoleTitleW('jcalc')
+
+    
+def addMagSuf(x):
+    if x == 0:
+        return ''
+        
+    sufs={-15:'f',-12:'p',-9:'n',-6:'u',-3:'m',3:'K',6:'M',9:'G',12:'T',15:'P'}
+    mag = int(log10(abs(x)))
+    
+    if mag > 15: mag = 15
+    if mag < -15: mag = -15
+    
+    powerNear3 = int(mag/3)*3
+    magNear3 = 10**powerNear3
+    try:
+        suffix = sufs[powerNear3]
+    except KeyError:
+        suffix=''
+        
+    final  = '{0:g}'.format(x / magNear3)
+    #print(x, magNear3, final + suffix)
+    return final + suffix
 
     
 class MainCmd(cmd.Cmd):
@@ -90,9 +102,12 @@ class MainCmd(cmd.Cmd):
 
         
         #replace magnitude suffixes
+        magFlag = False
         def suffixSub(match):
             sufs = {'f': 'e-15', 'p': 'e-12', 'n': 'e-9', 'u': 'e-6', 'm': 'e-3', 'K': 'e3', 'M': 'e6', 'G': 'e9', 'T': 'e12', 'P': 'e15'}
             m = match.group(0)
+            nonlocal magFlag
+            magFlag = True
             #return the found number with its suffix replaced to 'ePOWER'
             return m[:-1] + sufs[m[-1]]
         Line = re.sub(r'(\b\d+[fpnumKMGT]\b)', suffixSub, Line) 
@@ -113,7 +128,7 @@ class MainCmd(cmd.Cmd):
             if re.fullmatch(r'[\d.]+e-*[\d.]+', m): return m
             if re.fullmatch(r'[\d.]+e-[\d.]+', m): return m
             return r'0x' + m
-        Line = re.sub(r'(\b\d*[a-f-]+\d*[a-f-]*\b)', hexSub, Line) 
+        Line = re.sub(r'(\b\d*[a-f]+\d*[a-f]*\b)', hexSub, Line) 
 
         #convert hex to decimal
         def hexConv(match):
@@ -135,19 +150,39 @@ class MainCmd(cmd.Cmd):
             print("Can't calculate")
             return
 
-        #if result is an integer print it in hex and bin
+        hexResult = ''
+        binResult = ''
+        finResult = ''
+        sufResult = ''
+        
         if intResult == result:
-            decResult = fmt(intResult, 10)
-            hexResult = fmt(intResult, 16)
-            binResult = fmt(intResult, 2)
-            print('%s\n%s\n%s' % (decResult,hexResult, binResult))
-            self.resVals[self.resVar] = str(intResult)
+            finResult = intResult
         else:
-            decResult = fmt(result, 10)
-            print('%s' % decResult)
-            self.resVals[self.resVar] = str(result)      
+            finResult = result
+            
+        decResult = fmt(finResult, 10)
 
-        #advance history variable to the next letter
+        if (result <= 2**64):
+            hexResult = fmt(finResult, 16)
+            binResult = fmt(finResult, 2)
+        
+        if magFlag:
+            sufResult = addMagSuf(finResult)
+            if sufResult == decResult:
+                sufResult = ''
+            
+        justLen = max(len(binResult), 45)
+        decResult = decResult.rjust(justLen)
+        sufResult = sufResult.rjust(justLen)
+        hexResult = hexResult.rjust(justLen)
+        binResult = binResult.rjust(justLen)
+
+
+        print('%s\n%s\n%s\n%s' % (decResult, sufResult, hexResult, binResult))
+
+            
+        #advance history variable to the next letter after successful calculation
+        self.resVals[self.resVar] = str(finResult)
         self.setResVar()
 
 
@@ -174,8 +209,6 @@ Functions:
     tan(x) atan(x) tanh(x) atanh(x) 
 ''')
 
-def test():
-    print('test')
     
 
 class Colors:
@@ -272,12 +305,18 @@ def fmt(num, base=10):
     else:
         ret = str(num)
         
-    ret = ret.rjust(35)
+    #ret = ret.rjust(35)
     ret = highLight(ret)
 
     return ret
- 
 
+    
+def test():
+    sufs = {'f': 'e-15', 'p': 'e-12', 'n': 'e-9', 'u': 'e-6', 'm': 'e-3', 'K': 'e3', 'M': 'e6', 'G': 'e9', 'T': 'e12', 'P': 'e15'}
+    print('test')
+
+    [addMagSuf(x) for x in [0.001,1,200,999,1000,1001,9999,10000,100000,1000000]]
+    
 if __name__ == '__main__':
     if 'test' in sys.argv:
         test()

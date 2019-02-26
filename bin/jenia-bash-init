@@ -20,6 +20,10 @@ alias ethtool='sudo ethtool'
 alias ssh='ssh -X'
 
 
+#smaller font in trees in eclipse
+alias eclipse='GTK2_RC_FILES=~/my/conf/eclipse/gtkrc-eclipse eclipse &'
+
+
 #open any file
 alias o='xdg-open'
 
@@ -28,10 +32,29 @@ alias o='xdg-open'
 alias gtg='git log --all --graph --decorate --oneline --color=always | head -n $(( $(tput lines) - 5 ))'
 alias gts='git status'
 alias gtd='git diff'
+alias gtdd='git difftool'
+alias gtdc='git diff -w --color-words'
+
 
 
 #fixes "Couldn't connect to accessibility bus" warning when using SSH
 export NO_AT_BRIDGE=1
+
+
+#prefer programming sections in man
+export MANSECT="3:2:3posix:1:n:l:8:3pm:3perl:5:4:9:6:7"
+
+
+#when searching in less/man show found lines bit lower than screen top
+export LESS="--jump-target=5"
+
+
+#although I don't like vim
+export EDITOR=vim
+
+
+#notes selector window
+alias n="$HOME/my/notes/note-list.sh&"
 
 
 #show file full path
@@ -123,9 +146,9 @@ snr() {
 
     #grep is very fast in pattern matching: use it to select files to process
     grep --exclude-dir='*svn*' -r --binary-files=without-match --files-with-matches -P -e "$1" $Files | \
-	    while read -r File ; do
-	        #backup in a separate directory
-	        \cp -f "$File" $BakDir
+        while read -r File ; do
+            #backup in a separate directory
+            \cp -f "$File" $BakDir
 
             perl -p -i -e "s/$From/$To/g" "$File"
 
@@ -135,7 +158,7 @@ snr() {
             else
                 diff -u "$BakDir/$(basename $File)" "$File" | \grep -P "(^|\dm)[-+][^-+]" ; echo
             fi
-	    done
+        done
 
     #display replacement results
     # grep -r --color=always -e "$To" /tmp/sed-out/* 2>/dev/null | sed 's!/tmp/sed-out/!!'
@@ -154,7 +177,7 @@ mount-ssh() {
     #clean up empty dirs from previous mounts
     find ~/mnt -maxdepth 1 -type d -empty -exec rmdir {} \;
 
-	mkdir -p ~/mnt/$MountDir
+    mkdir -p ~/mnt/$MountDir
 
     sshfs $1 ~/mnt/$MountDir || return 1
 
@@ -197,19 +220,33 @@ else
 fi
 
 
+#
 #run ls if directory changed
-PrevDir=$(tty) 
-PrevDir=/tmp/prev-dir${PrevDir////-}
+#
+mkdir -p /tmp/prev-dir
+PrevFile=/tmp/prev-dir/prev-dir-$$-was
+NowFile=/tmp/prev-dir/prev-dir-$$-now
+
 #don't ls when shell launched
-echo $PWD > $PrevDir
-LsAfterCd() {
-    [[ "$(< $PrevDir)" == "$PWD" ]] && return 0
-    
+echo $PWD >  $PrevFile
+ls        >> $PrevFile
+\cp -f $PrevFile $NowFile
+
+LsOnChange() {
+    echo $PWD >> $HOME/.allhistory
+    history | tail -n 1 | grep --color=never -Po '(?<=  ).+' >> $HOME/.allhistory
+    echo >> $HOME/.allhistory
+
+    echo $PWD >  $NowFile
+    ls        >> $NowFile
+    cmp -s $NowFile $PrevFile && return 0
+
     ll --color=always | sed 1d
 
-    echo $PWD > $PrevDir
+    \cp -f $NowFile $PrevFile
 }
-PROMPT_COMMAND=LsAfterCd
+#run this function before prompt
+PROMPT_COMMAND=LsOnChange
 
 
 #more user-friendly Bash: normally these settings go into ~/.inputrc

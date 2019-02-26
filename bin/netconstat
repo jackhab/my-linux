@@ -1,0 +1,17 @@
+#!/bin/bash
+
+IfList=$(ifconfig | grep HWaddr | grep -Po '^\w+')
+
+
+for i in $IfList
+do
+    a=$(ifconfig $i | perl -ne 'print if s/^(\w+).+HWaddr(.+)/\1 \2/g')
+    b=$(ifconfig $i | grep -Po '(?<=inet addr:)\S+')
+    c=$(ethtool $i 2>/dev/null | grep Link | xargs)
+    echo $a $b $c
+    echo
+done | column -t
+
+[[ "$1" == "watch" ]] && exit 0
+
+watch -n 1 $0 watch

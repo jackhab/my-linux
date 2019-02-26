@@ -4,21 +4,24 @@
 trap 'tput cnorm ; kill $(jobs -p)' EXIT
 
 
+
 Main() {
     git log -n 1 &> /dev/null || { echo Nothing to git in this directory ; exit 1 ; }
-
-	#hide cursor
-	tput civis
 
     Prev="/tmp/git-mon-prev"
     Now="/tmp/git-mon-now"
 
     rm -rf $Prev $Now
 
+    Stat=$Now-stat
+
     #update remote repo log in background
     GitFetch &
 
     while true; do
+        #hide cursor
+        tput civis
+
         Lines=$(tput lines)
         Cols=$(tput cols)
 
@@ -33,7 +36,27 @@ Main() {
 
         mv -f $Now $Prev &>/dev/null
 
-        sleep 2
+        #read for file number selection to diff it
+        read -N 2 -t 2
+        [[ -z "$REPLY" ]] && continue
+
+        #force screen refresh to clear typed selection
+        echo $REPLY >> $Prev
+
+        [[ "$REPLY" == "cc" ]] && { git commit -a ; continue ; }
+        
+        [[ "$REPLY" == "pp" ]] && { git push ; continue ; }
+
+        if [[ "$REPLY" =~ [0-9][0-9] ]] ; then
+            DiffFile=$(
+                git status -s -b -u  | sed -e '=' |     #add lines with line numbers to status list
+                sed 'N;s/\n/\t/g' |                     #remove extra EOL
+                sed -r 's/^[0-9]/0&/' | grep  "^$REPLY" | cut -c 7- #extract file name
+            )
+
+            git difftool $DiffFile
+        fi
+
     done
 }
 
@@ -48,10 +71,12 @@ GitLog() {
     LWrap1="%w($(($Cols-3)),1,20)"
     CmdLog="git log -100 --all --graph --decorate=short --color \
      --format=format:\"$LWrap$LHash $LDate $LName $LMess $LRefs\""
-     #--format=format:\"$LWrap$LHash $LMess $LRefs $LDate $LName \""
 
-    #suppress status error in case there is no working tree
-    CmdStat="git status -s -b -u 2>/dev/null"
+    #print status with file names numbered for diff selection
+    CmdStat="git -c color.status=always status -s -b -u  | \
+                sed -e '=' | sed 'N;s/\n/\t/g' | \
+                sed -r 's/^[0-9]/0&/' 2>/dev/null"
+
 
     #how long is the status?
     StatusLines=$(eval $CmdStat | CountLines)
@@ -66,9 +91,7 @@ GitLog() {
     LogLines=$(($LogLines - $RealLogLines + $LogLines - 3))
 
     echo
-
     eval $CmdLog --color=always | head -n $LogLines | perl -lpe 's/(?<=\s)\d\d(\d\d)(?=-)/\1/g ; s/\.\. / /g'
-
     echo
 
     eval $CmdStat
@@ -92,15 +115,4 @@ CountLines() {
 
 
 Main
-
-
-#temp old junk
-#sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" |
-#printf %${Cols}s _ | tr ' ' _
-#echo $Lines $StatusLines $LogLines $RealLogLines
-#CmdLog="git log -100 --decorate=short --oneline --graph --branches --remotes --tags"
-#CmdLog="git log -100 --all --graph --decorate=short --color \
-# --format=format:\"%w($Cols,1,15)%C(auto)%h %C(white bold)%s%C(reset)%C(auto)%d %<(12,trunc)%ci %<(5,trunc)%ae\""
-#LMess="%<($(($Cols-12)),trunc)%C(white bold)%s%C(reset)"
-#LMess="%<($MessLen,trunc)%C(white bold)%s%C(reset)"
 

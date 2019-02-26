@@ -41,6 +41,8 @@ VIEW
 Ctrl-L              redraw screen
 :set nu             show line numbers
 :set list           show control characters
+:set wrap           wrap line visually
+:set linebreak      wrap only on word boundaries
 zm / zr (zM / zR)   fold more / less (all / none)
 za / zA             toggle fold / toggle recursively
 zn                  no folds

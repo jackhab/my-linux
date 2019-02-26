@@ -12,3 +12,8 @@ shell_patterns=0
 + ! t t
 3       Directory name to clipboard
 	echo -n %d/%f | xclip -in -selection clipboard
+
++ ! t t
+4       Unmount
+	sudo umount -f . && cd
+

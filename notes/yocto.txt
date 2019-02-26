@@ -1,17 +1,49 @@
+--------------------------------------------------
+CONFIGURE BIOS
+--------------------------------------------------
+OS type: Linux
+South Bridge: PCI, not ACPI, SPI enable
+
+
+--------------------------------------------------
+CONFIGURE NETWORK
+--------------------------------------------------
+/etc/network/interfaces:
+#auto eth0
+iface eth0 inet static
+	address 3.3.3.3
+	netmask 255.255.255.0
+	network 3.3.3.0
+	gateway 3.3.3.1
+
+
+
+
+--------------------------------------------------
+INIT
+--------------------------------------------------
+
+/home/root/jenia-init	
+#!/bin/sh
+insmod /home/root/igb.ko
+sleep 1
+ifconfig eth0 3.3.3.3 netmask 255.255.255.0
+
+ln -s /home/root/jenia-init /etc/rc5.d/S98jenia-init
+
+
+
+
+
+
 #################### NOW ####################
 Working in a new sxbit layer, trying to add
-lecbt-ethernet-config.cfg	OK
-
-Compare Intel layer in lecbt and vv
-
-
-
+lecbt-ethernet-config.cfg
 lecbt-usbsdcard-config.cfg
 no-timelimit-config.cfg
-
 FAIL: cannot activate flash in my layer based on vv layer
 
-FAIL
+
 Working in lecbt layer, trying to add GPIO
 VV:
 CONFIG_ARCH_WANT_OPTIONAL_GPIOLIB=y
@@ -33,7 +65,7 @@ CONFIG_GPIO_PCA953X=y
 CONFIG_GPIO_PCA953X_IRQ=y
 CONFIG_I2C_MUX_GPIO=y
 
-Try1:	FAIL
+Try1:
 add CONFIG_GPIO_DEVRES=y to lecbt
 
 
@@ -87,9 +119,7 @@ ls -l ~/poky-jethro/build/tmp/deploy/images/valleyisland-64/
 
 #kernel modification and rebuild
 bitbake linux-yocto -c menuconfig
-bitbake linux-yocto -C compile && 
-bitbake core-image-minimal	#to rebuild the image
-
+bitbake linux-yocto -C compile
 
 #kernel config location
 /home/jackhab/poky-jethro/meta-intel/tmp/work/corei7-64-intel-common-poky-linux/linux-yocto/3.14.62+gitAUTOINC+189154c0ed_27d9a1914b-r0/linux-corei7-64-intel-common-standard-build/.config

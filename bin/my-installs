@@ -12,8 +12,9 @@ update-locale LC_TIME=en_US.UTF-8
 read -p "Install virtualization packages? " -n 1 -r
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-	apt-get install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker
+	apt-get install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager 
 fi
 
 
-apt-get install -y terminator mc meld vim git wireshark tree sshfs htop gnome-disk-utility gparted tmux openssh-server
+apt-get install -y terminator mc meld vim git wireshark tree sshfs htop gnome-disk-utility gparted tmux openssh-server samba g++
+cifs-utils

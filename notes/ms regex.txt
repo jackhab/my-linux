@@ -1,0 +1,85 @@
+\	        escape char
+
+.           single char
+*           greedy zero or more
+@	        non-greedy zero or more
++           greedy zero or one
+#	        non-greedy zero or one
+^n          like GNU {3}
+
+^           SOL
+$           EOL
+<>          like \b
+\n          CRLF (both in find and replace)
+
+[]          char set
+[^]         exclusive char set
+
+(|)         any-of group, but NOT tagging like in GNU
+{}          non-capturing tagging expression: zo{1} matches "zo1" in "Alonzo1 " and "Gonzo1", but not "zo" in "zone".
+\n          nth tagged expression
+\0          replace with the whole match
+\(w,n)      in a Replace expression, w-right-justifies the nth expression; if you search for a{[0-9]}
+            and replace with \(10,1), the occurrences 10-char-justified the integer and right-justified by 10 spaces
+\(-w, n)    as above to the left
+ ~(X)       prevents a match when X appears at this point in the expression:
+                real~(ity) matches the "real" in "realty" and "really," but not the "real" in "reality" 
+                
+:a          alphanumeric character ([a-zA-Z0-9])
+:c          alphabetic character ([a-zA-Z])
+:d          decimal digit ([0-9])
+:z          decimal digit ([0-9])
+:h          hexadecimal digit ([0-9a-fA-F]+)
+:n          matches the expression (([0-9]+.[0-9]*)|([0-9]*.[0-9]+)|([0-9]+))
+:w          alphabetic string ([a-zA-Z]+)
+\e          escape
+\g          bell
+\h          backspace
+\t          tab
+:b          space or tab
+\x####      Unicode character
+\u####      Unicode character               
+                
+:i          C/C++ Identifier ([a-zA-Z_$][a-zA-Z0-9_$]*)
+:q          double or single quoted string: like (("[^"]*")|('[^']*'))
+
+:Lu         Uppercase letter
+:Ll         Lowercase letter
+:Lt         Title case letter pair
+:Lm         Modifier letter: commas, cross accents, and double prime
+:Lo         Matches other letters, such as gothic letter ahsa.
+:Nd         Decimal digit
+:Nl         Letter digit such as roman numerals
+:No         Other digit such as old italic number one
+:Ps         Open punctuation such as open brackets and braces
+:Pe         Close punctuation such as closing brackets and braces.
+:Pi         initial double quotation marks
+:Pf         single quotation marks and ending double quotation marks
+:Pd         dash mark
+:Pc         underscore or underline mark
+:Po         Matches () ? " ! @ # % & * \ (:) (;) ' /
+:Zs         Matches blanks.
+:Zl         Line separator Unicode character U+2028.
+:Zp         Paragraph separator Unicode character U+2029.
+:Mn         Non-spacing mark
+:Mc         Combining mark
+:Me         Enclosing mark
+:Sm         Math symbols + = ~ | < and >.
+:Sc         Currency symbol
+:Sk         Modifier symbol such as circumflex accent, grave accent, and macron
+:So         Other symbol such as the copyright sign, pilcrow sign, and the degree sign
+:Cc         Unicode control characters such as TAB and NEWLINE.
+:Cf         Formatting control character such as the bi-directional control characters
+:Cs         Matches half of a surrogate pair
+:Co         any character from the private-use area
+:Cn         characters that do not map to a Unicode character.
+:Al         Matches any one character. 
+:Nu         any one number or digit.
+:Pu         punctuation such as ?, @, ', and so on
+:Wh         all kinds of white space
+:Bi         characters from right-to-left scripts, such as Arabic and Hebrew.
+:Ha         Korean Hangul and combining Jamos
+:Hi         hiragana characters
+:Ka         katakana characters
+:Id         ideographic characters, such as Han and kanji
+

@@ -1,7 +1,11 @@
 --------------------------------------------------
-IN PIPE
+REPLACE IN PIPE
 --------------------------------------------------
-echo some text | perl lpe 's/x/y/g ; s/some/more/g'
+replace and print all lines
+    echo some text | perl -lpe 's/x/y/g ; s/some/more/g'
+
+replace and print only matching lines    
+    echo some text | perl -ne 'print if s/x/y/g ; s/some/more/g'
 
 
 --------------------------------------------------
