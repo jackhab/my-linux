@@ -1,3 +1,43 @@
+--------------------------------------------------
+STANDALONE
+--------------------------------------------------
+Version 1.2.3 solves problem with empty repos (1.2.0 comes with Ubuntu 18)
+	wget https://download.edgewall.org/trac/Trac-1.2.3.tar.gz
+	tar xf Trac-1.2.3.tar.gz
+	cd Trac-1.2.3
+	sudo ./setup.py install
+
+add admin user and launch
+	trac-admin test-trac initenv test sqlite:db/trac.db
+	trac-admin test-trac permission add admin TRAC_ADMIN
+	htpasswd -bc test-trac/.htpasswd admin pass
+	tracd --port 8000 --basic-auth="test-trac,test-trac/.htpasswd,trac" test-trac
+
+add a user
+	export TRACUSER=urig
+	trac-admin test-trac permission add $TRACUSER && htpasswd -bc test-trac/.htpasswd $TRACUSER pass
+
+add more users
+	sudo trac-admin . permission add evgenyh TICKET_ADMIN WIKI_ADMIN
+	sudo htdigest .htdigest ${PROJ_NAME} evgenyh
+
+list permissions
+	trac-admin test-trac permission list
+	
+components
+	trac-admin test-trac component list
+	trac-admin test-trac component add Test
+	trac-admin test-trac component add 1531
+	trac-admin test-trac component add 1538
+	trac-admin test-trac component rename component1 1531
+	trac-admin test-trac component rename component2 1538
+
+
+
+
+--------------------------------------------------
+APACHE (not surely works)
+--------------------------------------------------
 export PROJ_NAME=bamw
 
 sudo apt-get update -y
@@ -33,33 +73,6 @@ WSGIScriptAlias /trac/${PROJ_NAME} /var/www/html/trac/${PROJ_NAME}/cgi-bin/trac.
 
 sudo a2ensite trac.conf
 sudo systemctl restart apache2
-
-wget https://download.edgewall.org/trac/Trac-1.2.3.tar.gz
-tar xf Trac-1.2.3.tar.gz
-cd Trac-1.2.3
-sudo ./setup.py install
-sudo systemctl restart apache2
-
-
-#add more users
-sudo trac-admin . permission add evgenyh TICKET_ADMIN WIKI_ADMIN
-sudo htdigest .htdigest ${PROJ_NAME} evgenyh
-
-
-
-
-STANDALONE TEST -WORKS
-trac-admin test-trac initenv test sqlite:db/trac.db
-trac-admin test-trac permission add admin TRAC_ADMIN
-htpasswd -bc test-trac/.htpasswd admin pass
-tracd --port 8000 --basic-auth="test-trac,test-trac/.htpasswd,trac" test-trac
-
-
-
-
-
-
-
 
 
 

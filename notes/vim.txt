@@ -21,7 +21,7 @@ Ctrl-R               redo
 dd                   delete a line
 de                   delete to word's end
 J                    join lines
-:!                   cmd run cmd command
+:! cmd               run cmd command
 U / u                selection to upper / lower case
 Ctrl-C               cancel command
 Ctrl-O               execute a command (INS)

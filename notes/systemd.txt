@@ -1,18 +1,71 @@
-systemctl stop NetworkManager
-systemctl disable NetworkManager
-systemctl list-unit-files --type=service
+
+Startup service files and links to /lib/systemd/system
+	/etc/systemd/system/
+
+Init scripts
+	/usr/lib/systemd/system/
+
+Enable server by creating a link in /etc/systemd/system/
+	systemctl enable clamd@scan.service
+
+	
+List installed services
+	systemctl list-unit-files --type=service
+	
+Service status
+	enabled	has symlink in /etc/systemd/system/
+	disabled don't have symlink
+	static doesn't have [Install] section, only used as dependecy of others
+	
+Server management	
+	systemctl enable SERVICE
+	systemctl disable SERVICE
+	systemctl start SERVICE
+	systemctl stop SERVICE
+	systemctl restart SERVICE
+	systemctl reload SERVICE
+	systemctl status SERVICE
+	systemctl is-active SERVICE
+	systemctl list-units --type service --all
+
+Boot time per service
+	systemd-analyze blame
+	
+Non-service systemd unit types
+	target: 	group of units
+	automount: 	filesystem auto-mountpoint
+	device: 	kernel device names, which you can see in sysfs and udev
+	mount: 		filesystem mountpoint
+	path: 		file or directory
+	scope: 		external processes not started by systemd
+	slice: 		a management unit of processes
+	snapshot:	systemd saved state
+	socket: 	IPC socket
+	swap: 		swap file
+	timer: 		systemd timer
+
+Get/set/switch current run level
+	systemctl get-default 
+	systemctl set-default multi-user.target 
+	systemctl isolate multi-user.target 
+	
+Run level vs Systemd target
+	(runlevel0.target is a symbolic link to poweroff.target and so on)
+	0 poweroff.target 
+	1 rescue.target
+	3 multi-user.target
+	5 graphical.target
+	6 reboot.target
+	Emergency emergency.target
 
 
-systemctl start SERVICE
-systemctl stop SERVICE
-systemctl restart SERVICE
-systemctl reload SERVICE
-systemctl status SERVICE
-systemctl is-active SERVICE
-systemctl list-units --type service --all
-
-
-journalctl -b from current boot
-journalctl -k from kernel
-
-journalctl -b -u nginx.service all logs for unit from boot
+Show logs
+	journalctl -u SERVICE
+	journalctl -b -u SERVICE #from current boot
+	journalctl -k -u SERVICE #from kernel
+	journalctl -f -u SERVICE #follow (like tail)
+	systemctl -l status SERVICE #status and log
+	
+--no-pager
+export SYSEMD_PAGER=''
+journalctl --vacuum-time=1seconds #clear logs
