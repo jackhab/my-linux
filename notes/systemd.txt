@@ -67,5 +67,22 @@ Show logs
 	systemctl -l status SERVICE #status and log
 	
 --no-pager
-export SYSEMD_PAGER=''
+export SYSTEMD_PAGER=''
 journalctl --vacuum-time=1seconds #clear logs
+
+--------------------------------------------------
+Linux startup scripts creation
+--------------------------------------------------
+echo 'SERVICE.service
+[Unit]
+Description=MY SERVICE
+
+[Service]
+ExecStartPre=/bin/bash -c "ifconfig eth0 192.168.10.10"
+ExecStart=/home/root/EXECUTABLE
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+' > /lib/systemd/system/SERVICE.service
+
